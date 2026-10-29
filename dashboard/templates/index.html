@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="QuantumSense - Quantum-Enhanced Sensor Fault Detection Dashboard (URK24CS1111)">
+    <title>QuantumSense | Quantum-Enhanced Sensor Fault Detection</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Dashboard Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Top Global Header -->
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="brand-logo">⚡</div>
+            <div class="brand-text">
+                <h1>QuantumSense</h1>
+                <span class="sub-badge">Industrial IoT • Quantum Fault Detection</span>
+            </div>
+        </div>
+        <div class="header-meta">
+            <!-- Active Dataset Pill -->
+            <div class="active-dataset-pill" id="headerDatasetPill">
+                <span class="pill-dot" id="headerDatasetDot"></span>
+                <span id="headerDatasetText">Synthetic Telemetry</span>
+            </div>
+            <!-- System Status Indicator -->
+            <div class="status-indicator">
+                <span class="pulse-dot" id="systemStatusDot"></span>
+                <span id="systemStatusText">Connecting...</span>
+            </div>
+            <div class="student-pill">
+                <span class="pill-label">Project ID:</span>
+                <span class="pill-value">URK24CS1111</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-container">
+        <ul class="nav-tabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-tab="tab-dashboard" role="tab" aria-selected="true">
+                    <span class="tab-icon">📊</span> Overview
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-sensors" role="tab" aria-selected="false">
+                    <span class="tab-icon">⚡</span> Live Sensors
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-custom-data" role="tab" aria-selected="false">
+                    <span class="tab-icon">📁</span> Custom Dataset Lab
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-analytics" role="tab" aria-selected="false">
+                    <span class="tab-icon">📈</span> Dataset Analytics
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-training" role="tab" aria-selected="false">
+                    <span class="tab-icon">🛠️</span> Model Training
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-comparison" role="tab" aria-selected="false">
+                    <span class="tab-icon">⚖️</span> Model Comparison
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-detection" role="tab" aria-selected="false">
+                    <span class="tab-icon">🔧</span> Fault Predictor
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-history" role="tab" aria-selected="false">
+                    <span class="tab-icon">📋</span> Reports & History
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="tab-about" role="tab" aria-selected="false">
+                    <span class="tab-icon">ℹ️</span> About
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- ==================================================================== -->
+        <!-- TAB 1: OVERVIEW (DASHBOARD) -->
+        <!-- ==================================================================== -->
+        <section id="tab-dashboard" class="tab-pane active" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Industrial Sensor Telemetry Overview</h2>
+                    <p class="section-desc">Real-time status monitoring, dataset distribution, and high-level anomaly rates.</p>
+                </div>
+                <div class="title-action-buttons">
+                    <button class="btn btn-secondary btn-sm" id="btnRefreshDashboard">
+                        <span class="btn-icon">🔄</span> Refresh Status
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Dataset Banner -->
+            <div class="banner-card mb-4" id="overviewDatasetBanner">
+                <div class="banner-left">
+                    <span class="banner-badge" id="overviewBannerBadge">SYNTHETIC DATASET</span>
+                    <strong id="overviewBannerTitle">3-Sensor Physics-Based Simulated Benchmark</strong>
+                    <span class="banner-meta" id="overviewBannerMeta">1,000 samples • 15 features • 5 fault classes</span>
+                </div>
+                <div class="banner-right">
+                    <button class="btn btn-outline btn-sm" onclick="switchTab('tab-custom-data')">
+                        📁 Open Custom Dataset Lab
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary KPI Cards -->
+            <div class="grid grid-kpi">
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-blue">📊</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Total Dataset Samples</span>
+                        <h3 class="kpi-value" id="kpiTotalSamples">--</h3>
+                        <span class="kpi-subtext" id="kpiSamplesSub">15 Statistical Features</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-green">✅</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Normal Operations</span>
+                        <h3 class="kpi-value" id="kpiNormalSamples">--</h3>
+                        <span class="kpi-subtext">Baseline Operational State</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-red">❌</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Faulty Conditions</span>
+                        <h3 class="kpi-value" id="kpiFaultySamples">--</h3>
+                        <span class="kpi-subtext">Drift, Stuck, Noisy, Spike</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-teal">⚡</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Detection Accuracy</span>
+                        <h3 class="kpi-value" id="kpiAccuracy">--%</h3>
+                        <span class="kpi-subtext" id="kpiModelName">Classical SVM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Visuals Grid -->
+            <div class="grid grid-2-col mt-4">
+                <!-- Fault Distribution Chart Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Fault Class Distribution</h3>
+                        <span class="badge badge-sim">Simulated Benchmark</span>
+                    </div>
+                    <div class="card-body chart-container-pie">
+                        <canvas id="faultDistributionChart"></canvas>
+                    </div>
+                    <div class="card-footer-legend" id="faultClassLegend">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- System Readiness & Pipeline Status Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>System Pipeline Status</h3>
+                        <span class="badge" id="badgePipeline">Checking</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="pipeline-list">
+                            <div class="pipeline-item">
+                                <div class="pipeline-title">
+                                    <span class="pipeline-dot" id="dotDataset"></span>
+                                    <strong>Sensor Dataset (sensor_data.csv)</strong>
+                                </div>
+                                <span class="pipeline-status" id="statusDataset">Checking...</span>
+                            </div>
+
+                            <div class="pipeline-item">
+                                <div class="pipeline-title">
+                                    <span class="pipeline-dot" id="dotClassical"></span>
+                                    <strong>Classical SVM Model (RBF Kernel)</strong>
+                                </div>
+                                <span class="pipeline-status" id="statusClassical">Checking...</span>
+                            </div>
+
+                            <div class="pipeline-item">
+                                <div class="pipeline-title">
+                                    <span class="pipeline-dot" id="dotQuantum"></span>
+                                    <strong>Quantum Model (ZZFeatureMap QSVC)</strong>
+                                </div>
+                                <span class="pipeline-status" id="statusQuantum">Checking...</span>
+                            </div>
+
+                            <div class="pipeline-item">
+                                <div class="pipeline-title">
+                                    <span class="pipeline-dot" id="dotMetrics"></span>
+                                    <strong>Evaluation Results (metrics.json)</strong>
+                                </div>
+                                <span class="pipeline-status" id="statusMetrics">Checking...</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Action Row -->
+                        <div class="quick-actions-box mt-3">
+                            <span class="quick-actions-title">⚡ Operational Shortcuts:</span>
+                            <div class="quick-actions-buttons">
+                                <button class="btn btn-outline btn-xs" onclick="switchTab('tab-sensors')">Monitor Telemetry</button>
+                                <button class="btn btn-outline btn-xs" onclick="switchTab('tab-training')">Train Models</button>
+                                <button class="btn btn-outline btn-xs" onclick="switchTab('tab-detection')">Run Diagnostics</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Detections Log Table -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Recent Diagnostic Events (Live In-Memory Feed)</h3>
+                    <span class="badge badge-teal">Latest 10 Detections</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Timestamp</th>
+                                    <th>Model Engine</th>
+                                    <th>Diagnostic Class</th>
+                                    <th>Confidence</th>
+                                    <th>Health Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentPredictionsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">No diagnostic classifications executed yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 2: LIVE SENSORS -->
+        <!-- ==================================================================== -->
+        <section id="tab-sensors" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Live Sensor Waveforms & Signal Telemetry</h2>
+                    <p class="section-desc">Multi-channel sensor monitoring with interactive physics-based fault condition injection.</p>
+                </div>
+                <div class="simulation-tag">
+                    <span class="tag-icon">⚠️</span> SIMULATED INDUSTRIAL TELEMETRY
+                </div>
+            </div>
+
+            <!-- Sensor Telemetry KPI Display Cards -->
+            <div class="grid grid-3-col">
+                <div class="card telemetry-card temp-glow">
+                    <div class="telemetry-header">
+                        <span class="telemetry-label">Temperature Sensor (PT100)</span>
+                        <span class="badge badge-sim">Simulated</span>
+                    </div>
+                    <div class="telemetry-value-wrap">
+                        <span class="telemetry-val" id="curTemp">75.0</span>
+                        <span class="telemetry-unit">°C</span>
+                    </div>
+                    <div class="telemetry-sub">Nominal Range: 71.0 °C – 79.0 °C</div>
+                </div>
+
+                <div class="card telemetry-card pres-glow">
+                    <div class="telemetry-header">
+                        <span class="telemetry-label">Pressure Sensor (Piezoelectric)</span>
+                        <span class="badge badge-sim">Simulated</span>
+                    </div>
+                    <div class="telemetry-value-wrap">
+                        <span class="telemetry-val" id="curPres">101.3</span>
+                        <span class="telemetry-unit">kPa</span>
+                    </div>
+                    <div class="telemetry-sub">Nominal Range: 98.3 kPa – 104.3 kPa</div>
+                </div>
+
+                <div class="card telemetry-card vib-glow">
+                    <div class="telemetry-header">
+                        <span class="telemetry-label">Vibration Sensor (MEMS Tri-Axial)</span>
+                        <span class="badge badge-sim">Simulated</span>
+                    </div>
+                    <div class="telemetry-value-wrap">
+                        <span class="telemetry-val" id="curVib">0.500</span>
+                        <span class="telemetry-unit">mm/s</span>
+                    </div>
+                    <div class="telemetry-sub">Nominal Range: 0.30 mm/s – 0.70 mm/s</div>
+                </div>
+            </div>
+
+            <!-- Real-Time Waveform Trend Charts -->
+            <div class="grid grid-3-col mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Temperature Waveform (°C)</h4>
+                        <span class="badge badge-dark">30 Rolling Points</span>
+                    </div>
+                    <div class="card-body chart-container-line">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Pressure Waveform (kPa)</h4>
+                        <span class="badge badge-dark">30 Rolling Points</span>
+                    </div>
+                    <div class="card-body chart-container-line">
+                        <canvas id="presChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Vibration Waveform (mm/s)</h4>
+                        <span class="badge badge-dark">30 Rolling Points</span>
+                    </div>
+                    <div class="card-body chart-container-line">
+                        <canvas id="vibChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls and Fault Injector Panel -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Simulation Control & Fault Injection Console</h3>
+                    <div class="header-controls">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleAutoSim">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">Continuous Stream (3s Interval)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="controls-toolbar">
+                        <div class="control-group">
+                            <label for="selectFaultInject">Operating Condition to Inject:</label>
+                            <select id="selectFaultInject" class="form-select">
+                                <option value="">Random Fault Condition</option>
+                                <option value="0">Class 0: Normal Operation</option>
+                                <option value="1">Class 1: Drift Fault (Linear Slope)</option>
+                                <option value="2">Class 2: Stuck Sensor (Frozen Value)</option>
+                                <option value="3">Class 3: High Noise (Elevated StdDev)</option>
+                                <option value="4">Class 4: Transient Spike (Sudden Impulse)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="selectModelType">Classifier Model Engine:</label>
+                            <select id="selectModelType" class="form-select">
+                                <option value="classical">Classical SVM (RBF Kernel)</option>
+                                <option value="quantum">Quantum QSVC (ZZFeatureMap)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-actions">
+                            <button class="btn btn-primary" id="btnGenerateReading">
+                                <span class="btn-icon">⚡</span> Generate Reading
+                            </button>
+                            <button class="btn btn-accent" id="btnRunDetection">
+                                <span class="btn-icon">🔧</span> Run Fault Detection
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="status-summary-bar mt-3">
+                        <div class="summary-meta-item">
+                            <span class="meta-label">Simulated Timestamp:</span>
+                            <strong id="simTimestamp">--:--:--</strong>
+                        </div>
+                        <div class="summary-meta-item">
+                            <span class="meta-label">Ground Truth Condition:</span>
+                            <span class="badge badge-normal" id="sensorStatusBadge">Normal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 15 Extracted Sliding-Window Features Table -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Current Window Feature Extraction (Window Size = 50 readings)</h3>
+                    <span class="badge badge-teal">15 Temporal Features</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Sensor</th>
+                                    <th>Mean (μ)</th>
+                                    <th>Std Dev (σ)</th>
+                                    <th>Min Value</th>
+                                    <th>Max Value</th>
+                                    <th>Slope (Trend)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="featureTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 3: CUSTOM DATASET LAB (NEW) -->
+        <!-- ==================================================================== -->
+        <section id="tab-custom-data" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Custom Dataset Lab</h2>
+                    <p class="section-desc">Upload, inspect, window, and preprocess custom CSV sensor telemetry for classical and quantum machine learning.</p>
+                </div>
+                <div class="dataset-source-selector">
+                    <span class="selector-label">Active Dataset Source:</span>
+                    <button class="btn btn-sm btn-outline active-source-btn" id="btnSelectSynthetic">Synthetic Dataset</button>
+                    <button class="btn btn-sm btn-outline" id="btnSelectCustom">Custom Uploaded</button>
+                </div>
+            </div>
+
+            <!-- Drag & Drop Upload Zone -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Upload Custom CSV Sensor Dataset</h3>
+                    <span class="badge badge-teal">Accepts .CSV (Max 25 MB)</span>
+                </div>
+                <div class="card-body">
+                    <div class="drop-zone" id="csvDropZone">
+                        <div class="drop-zone-icon">📥</div>
+                        <h4>Drag and drop your CSV dataset here</h4>
+                        <p class="text-muted">or click to browse from your computer</p>
+                        <input type="file" id="csvFileInput" accept=".csv" class="file-input-hidden">
+                        <button class="btn btn-primary btn-sm mt-2" onclick="document.getElementById('csvFileInput').click()">
+                            Browse Files
+                        </button>
+                    </div>
+                    <div class="upload-tip-box mt-3">
+                        <span class="tip-icon">💡</span>
+                        <span><strong>Supported Data Formats:</strong> Either <em>Mode A</em> (Precomputed samples with statistical features and label) or <em>Mode B</em> (Raw sequential time-series sensor readings which will be windowed).</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dataset Inspection & Preview Card (Hidden until file uploaded) -->
+            <div class="card mb-4 d-none" id="uploadPreviewCard">
+                <div class="card-header">
+                    <div>
+                        <h3 id="inspectFileName">dataset.csv</h3>
+                        <span class="text-muted" id="inspectMetaStats">Loading...</span>
+                    </div>
+                    <button class="btn btn-outline btn-xs" id="btnCancelUpload">Cancel & Choose Another</button>
+                </div>
+                <div class="card-body">
+                    <!-- High-level stats pill row -->
+                    <div class="stats-pills-row mb-3" id="inspectPillsRow">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Mode Selection -->
+                    <div class="card inner-card mb-4">
+                        <div class="card-header py-2">
+                            <h4>Feature Extraction & Ingestion Mode</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-2-col">
+                                <label class="mode-radio-box" id="modeBoxA">
+                                    <input type="radio" name="extractionMode" value="precomputed" checked id="modePrecomputed">
+                                    <div class="mode-info">
+                                        <strong>Mode A: Precomputed Features</strong>
+                                        <p class="text-muted">Dataset already contains one row per sample with pre-extracted numerical features and optional class label.</p>
+                                    </div>
+                                </label>
+
+                                <label class="mode-radio-box" id="modeBoxB">
+                                    <input type="radio" name="extractionMode" value="window" id="modeWindow">
+                                    <div class="mode-info">
+                                        <strong>Mode B: Raw Time-Series Sensor Stream</strong>
+                                        <p class="text-muted">Sequential raw sensor readings. Automatically extracts mean, std, min, max, and trend slope using sliding windows.</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Windowing Configuration (visible only in Mode B) -->
+                            <div class="window-config-box mt-3 d-none" id="windowConfigBox">
+                                <label for="windowSizeSlider" class="d-flex justify-between">
+                                    <span>Sliding Window Size ($W$ readings per window):</span>
+                                    <strong id="windowSizeVal">50</strong>
+                                </label>
+                                <input type="range" id="windowSizeSlider" min="10" max="200" step="5" value="50" class="slider-input">
+                                <span class="text-muted small">Window stride is set equal to window size (non-overlapping) to guarantee zero test data leakage.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column Mapping Panel -->
+                    <div class="card inner-card mb-4">
+                        <div class="card-header py-2">
+                            <h4>Column Role Mapping</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-3-col">
+                                <div>
+                                    <label class="form-label font-bold">Target / Fault Label Column:</label>
+                                    <select id="targetColumnSelect" class="form-select">
+                                        <option value="">(None - Unlabelled / Inference Only)</option>
+                                    </select>
+                                    <span class="small text-muted">Used for supervised training & accuracy benchmarking.</span>
+                                </div>
+
+                                <div>
+                                    <label class="form-label font-bold">Timestamp Column (Optional):</label>
+                                    <select id="timestampColumnSelect" class="form-select">
+                                        <option value="">(None)</option>
+                                    </select>
+                                    <span class="small text-muted">Sorts sequential readings prior to sliding windowing.</span>
+                                </div>
+
+                                <div>
+                                    <label class="form-label font-bold">Missing Values Strategy:</label>
+                                    <select id="missingStrategySelect" class="form-select">
+                                        <option value="mean">Impute with Column Mean</option>
+                                        <option value="median">Impute with Column Median</option>
+                                        <option value="drop">Drop Rows with Missing Values</option>
+                                        <option value="ffill">Forward/Backward Fill</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label class="form-label font-bold">Select Sensor Feature Columns for Model Training:</label>
+                                <div class="checkbox-columns-grid" id="featureColumnsContainer">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+
+                            <div class="mt-3 d-flex gap-3">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="dropDuplicatesCheck" checked>
+                                    <span>Drop duplicate rows</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="handleOutliersCheck">
+                                    <span>Clip extreme IQR outliers (2.5× IQR)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="d-flex justify-between align-center mb-3">
+                        <span class="text-muted" id="processSummaryHint">Ready to process dataset.</span>
+                        <button class="btn btn-accent btn-lg" id="btnProcessCustomDataset">
+                            ⚡ Clean, Process & Activate Custom Dataset
+                        </button>
+                    </div>
+
+                    <!-- Data Table Preview -->
+                    <h4>Dataset Preview (First 15 Rows)</h4>
+                    <div class="table-responsive preview-table-wrap">
+                        <table class="data-table" id="uploadPreviewTable">
+                            <thead id="previewTableHead"></thead>
+                            <tbody id="previewTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 4: DATASET ANALYTICS (NEW) -->
+        <!-- ==================================================================== -->
+        <section id="tab-analytics" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Dataset Analytics & Statistical Properties</h2>
+                    <p class="section-desc">In-depth statistical validation, feature distributions, class balance ratios, and correlation matrices.</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnRefreshAnalytics">
+                    <span class="btn-icon">🔄</span> Refresh Analytics
+                </button>
+            </div>
+
+            <!-- Analytics KPI Grid -->
+            <div class="grid grid-4-col">
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-blue">📊</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Total Sample Size</span>
+                        <h3 class="kpi-value" id="anaTotalSamples">--</h3>
+                        <span class="kpi-subtext" id="anaFeatureCount">-- Features</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-teal">💾</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Memory Footprint</span>
+                        <h3 class="kpi-value" id="anaMemoryFootprint">-- MB</h3>
+                        <span class="kpi-subtext">Active Dataset Cache</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-green">🛡️</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Missing Values</span>
+                        <h3 class="kpi-value" id="anaMissingCount">0</h3>
+                        <span class="kpi-subtext" id="anaDuplicateCount">0 Duplicate Rows</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="kpi-icon-wrap icon-purple">🏷️</div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Class Balance</span>
+                        <h3 class="kpi-value" id="anaClassCount">--</h3>
+                        <span class="kpi-subtext" id="anaBalanceStatus">Balanced</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Imbalance Warning Alert Box (Hidden unless imbalanced) -->
+            <div class="alert alert-warning mt-3 d-none" id="anaImbalanceAlert">
+                <span class="alert-icon">⚠️</span>
+                <span id="anaImbalanceText">Class imbalance detected in dataset.</span>
+            </div>
+
+            <!-- Visual Charts Row -->
+            <div class="grid grid-2-col mt-4">
+                <!-- Class Distribution Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Fault Category Distribution</h3>
+                        <span class="badge badge-teal">Active Dataset</span>
+                    </div>
+                    <div class="card-body chart-container-pie">
+                        <canvas id="anaClassChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Feature Distribution Histogram -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Feature Value Histogram (Top Features)</h3>
+                        <span class="badge badge-teal">10 Value Bins</span>
+                    </div>
+                    <div class="card-body chart-container-pie">
+                        <canvas id="anaHistChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pearson Correlation Heatmap Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Feature Correlation Matrix (Pearson $r$)</h3>
+                    <span class="badge badge-dark">Pairwise Linear Collinearity</span>
+                </div>
+                <div class="card-body">
+                    <div class="corr-matrix-wrapper" id="anaCorrMatrixContainer">
+                        <p class="text-muted text-center py-4">Loading correlation matrix...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Numerical Statistical Summary Table -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Numerical Summary Statistics</h3>
+                    <span class="badge badge-teal">Five-Number Summary + Skewness</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Feature Name</th>
+                                    <th>Mean (μ)</th>
+                                    <th>Std Dev (σ)</th>
+                                    <th>Min</th>
+                                    <th>25% (Q1)</th>
+                                    <th>Median (Q2)</th>
+                                    <th>75% (Q3)</th>
+                                    <th>Max</th>
+                                    <th>Skewness</th>
+                                </tr>
+                            </thead>
+                            <tbody id="anaStatsTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 5: MODEL TRAINING STUDIO (NEW) -->
+        <!-- ==================================================================== -->
+        <section id="tab-training" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Model Training & Benchmarking Studio</h2>
+                    <p class="section-desc">Train classical Support Vector Machine and simulated Quantum QSVC classifiers with configurable hyperparameters.</p>
+                </div>
+                <div class="active-dataset-tag">
+                    <span class="tag-label">Active Dataset:</span>
+                    <strong id="trainActiveDatasetTitle">Synthetic Multi-Sensor Telemetry</strong>
+                </div>
+            </div>
+
+            <div class="grid grid-2-col">
+                <!-- Training Controls Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Training Configuration</h3>
+                        <span class="badge badge-teal">Zero Data Leakage Guarantee</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Model Selection Radios -->
+                        <div class="mb-4">
+                            <label class="form-label font-bold">Select Model(s) to Train:</label>
+                            <div class="grid grid-3-col gap-2 mt-2">
+                                <label class="selection-card">
+                                    <input type="radio" name="trainModelChoice" value="classical" checked>
+                                    <div class="selection-card-body">
+                                        <strong>Classical SVM</strong>
+                                        <span class="small text-muted">RBF Kernel • Sub-second</span>
+                                    </div>
+                                </label>
+
+                                <label class="selection-card">
+                                    <input type="radio" name="trainModelChoice" value="quantum">
+                                    <div class="selection-card-body">
+                                        <strong>Quantum QSVC</strong>
+                                        <span class="small text-muted">ZZFeatureMap • 4 Qubits</span>
+                                    </div>
+                                </label>
+
+                                <label class="selection-card">
+                                    <input type="radio" name="trainModelChoice" value="both">
+                                    <div class="selection-card-body">
+                                        <strong>Both (Benchmark)</strong>
+                                        <span class="small text-muted">Side-by-side comparison</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Split Percentage Slider -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-between mb-1">
+                                <label for="trainSplitSlider" class="form-label font-bold">Test Split Proportion:</label>
+                                <strong id="trainSplitValText">25% (Hold-out Test Set)</strong>
+                            </div>
+                            <input type="range" id="trainSplitSlider" min="10" max="40" step="5" value="25" class="slider-input">
+                            <span class="small text-muted">Stratified split ensures balanced representation of all fault categories.</span>
+                        </div>
+
+                        <!-- Quantum Subsampling Limit Selector -->
+                        <div class="mb-4">
+                            <label for="trainQuantumSamples" class="form-label font-bold">Quantum Training Subset (Tractable CPU Limit):</label>
+                            <select id="trainQuantumSamples" class="form-select">
+                                <option value="40">40 Samples (Fastest ~10s simulation)</option>
+                                <option value="60">60 Samples (~20s simulation)</option>
+                                <option value="80" selected>80 Samples (Standard benchmark ~25-35s)</option>
+                                <option value="100">100 Samples (Detailed ~50-60s)</option>
+                            </select>
+                            <span class="small text-muted">Because quantum statevector evaluation computes $O(N^2)$ pairwise kernel circuits, subsetting keeps local CPU runtime manageable.</span>
+                        </div>
+
+                        <!-- Random Seed -->
+                        <div class="mb-4">
+                            <label for="trainSeedInput" class="form-label font-bold">Random Seed (Reproducibility):</label>
+                            <input type="number" id="trainSeedInput" value="42" class="form-control" style="max-width: 150px;">
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3">
+                            <button class="btn btn-accent btn-lg flex-1" id="btnStartTraining">
+                                🚀 Start Training Pipeline
+                            </button>
+                            <button class="btn btn-secondary btn-lg" id="btnCancelTraining" disabled>
+                                ⏹ Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Training Status & Console Log Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Training Execution Console</h3>
+                        <span class="badge" id="trainStatusBadge">Idle</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Progress Bar -->
+                        <div class="progress-wrap mb-3">
+                            <div class="d-flex justify-between small mb-1">
+                                <span id="trainStageText">Ready to start training.</span>
+                                <strong id="trainProgressPct">0%</strong>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="trainingProgressBar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Terminal Log Box -->
+                        <div class="terminal-log-box" id="trainConsoleLogs">
+                            <div class="log-line text-muted">[System] Training studio ready. Select parameters and click 'Start Training'.</div>
+                        </div>
+
+                        <!-- Latest Results Summary Box (Hidden until training done) -->
+                        <div class="card inner-card mt-3 d-none" id="trainingResultsCard">
+                            <div class="card-header py-1">
+                                <h4 class="m-0 text-success">✓ Training Complete</h4>
+                            </div>
+                            <div class="card-body py-2">
+                                <div id="trainingResultsSummaryText">Metrics ready. View in Model Comparison tab.</div>
+                                <button class="btn btn-primary btn-sm mt-2" onclick="switchTab('tab-comparison')">
+                                    View Full Model Comparison ➔
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 6: MODEL COMPARISON -->
+        <!-- ==================================================================== -->
+        <section id="tab-comparison" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Classical SVM vs. Quantum QSVC Benchmark</h2>
+                    <p class="section-desc">Empirical comparative benchmarking evaluated on identical held-out test partitions.</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnRefreshMetrics">
+                    <span class="btn-icon">🔄</span> Reload Metrics
+                </button>
+            </div>
+
+            <!-- Metric Comparison Cards Grid -->
+            <div class="grid grid-3-col">
+                <div class="card metric-card">
+                    <div class="metric-header">Classification Accuracy</div>
+                    <div class="comparison-values">
+                        <div class="comp-col">
+                            <span class="comp-label">Classical SVM</span>
+                            <span class="comp-val val-blue" id="metricAccClassical">--%</span>
+                        </div>
+                        <div class="comp-divider">vs</div>
+                        <div class="comp-col">
+                            <span class="comp-label">Quantum QSVC</span>
+                            <span class="comp-val val-teal" id="metricAccQuantum">--%</span>
+                        </div>
+                    </div>
+                    <div class="metric-footer">Correctly classified test windows / Total test windows</div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="metric-header">Macro F1-Score</div>
+                    <div class="comparison-values">
+                        <div class="comp-col">
+                            <span class="comp-label">Classical SVM</span>
+                            <span class="comp-val val-blue" id="metricF1Classical">--</span>
+                        </div>
+                        <div class="comp-divider">vs</div>
+                        <div class="comp-col">
+                            <span class="comp-label">Quantum QSVC</span>
+                            <span class="comp-val val-teal" id="metricF1Quantum">--</span>
+                        </div>
+                    </div>
+                    <div class="metric-footer">Unweighted mean of per-class F1-scores</div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="metric-header">Weighted F1-Score</div>
+                    <div class="comparison-values">
+                        <div class="comp-col">
+                            <span class="comp-label">Classical SVM</span>
+                            <span class="comp-val val-blue" id="metricWeightedF1Classical">--</span>
+                        </div>
+                        <div class="comp-divider">vs</div>
+                        <div class="comp-col">
+                            <span class="comp-label">Quantum QSVC</span>
+                            <span class="comp-val val-teal" id="metricWeightedF1Quantum">--</span>
+                        </div>
+                    </div>
+                    <div class="metric-footer">Support-weighted harmonic mean across classes</div>
+                </div>
+            </div>
+
+            <div class="grid grid-3-col mt-3">
+                <div class="card metric-card">
+                    <div class="metric-header">Macro Precision</div>
+                    <div class="comparison-values">
+                        <div class="comp-col">
+                            <span class="comp-label">Classical SVM</span>
+                            <span class="comp-val val-blue" id="metricPrecClassical">--</span>
+                        </div>
+                        <div class="comp-divider">vs</div>
+                        <div class="comp-col">
+                            <span class="comp-label">Quantum QSVC</span>
+                            <span class="comp-val val-teal" id="metricPrecQuantum">--</span>
+                        </div>
+                    </div>
+                    <div class="metric-footer">Purity of fault classifications</div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="metric-header">Macro Recall</div>
+                    <div class="comparison-values">
+                        <div class="comp-col">
+                            <span class="comp-label">Classical SVM</span>
+                            <span class="comp-val val-blue" id="metricRecClassical">--</span>
+                        </div>
+                        <div class="comp-divider">vs</div>
+                        <div class="comp-col">
+                            <span class="comp-label">Quantum QSVC</span>
+                            <span class="comp-val val-teal" id="metricRecQuantum">--</span>
+                        </div>
+                    </div>
+                    <div class="metric-footer">Sensitivity to genuine fault events</div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="metric-header">Training Duration</div>
+                    <div class="comparison-values">
+                        <div class="comp-col">
+                            <span class="comp-label">Classical SVM</span>
+                            <span class="comp-val val-blue" id="metricTrainClassical">-- s</span>
+                        </div>
+                        <div class="comp-divider">vs</div>
+                        <div class="comp-col">
+                            <span class="comp-label">Quantum QSVC</span>
+                            <span class="comp-val val-teal" id="metricTrainQuantum">-- s</span>
+                        </div>
+                    </div>
+                    <div class="metric-footer">Simulation overhead on classical CPU</div>
+                </div>
+            </div>
+
+            <!-- Grouped Bar Chart Visual Comparison -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Empirical Performance Comparison Chart</h3>
+                    <div class="chart-legend-pills">
+                        <span class="pill-indicator pill-blue">■ Classical SVM</span>
+                        <span class="pill-indicator pill-teal">■ Quantum QSVC</span>
+                    </div>
+                </div>
+                <div class="card-body chart-container-bar">
+                    <canvas id="modelComparisonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Confusion Matrix Side-by-Side Card -->
+            <div class="grid grid-2-col mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Classical SVM Confusion Matrix</h3>
+                        <span class="badge badge-primary">RBF Kernel</span>
+                    </div>
+                    <div class="card-body text-center" id="cmClassicalContainer">
+                        <img id="imgCmClassical" src="/results/confusion_matrix_classical.png" alt="Classical Confusion Matrix" class="img-responsive cm-image">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Quantum QSVC Confusion Matrix</h3>
+                        <span class="badge badge-teal">ZZFeatureMap Kernel</span>
+                    </div>
+                    <div class="card-body text-center" id="cmQuantumContainer">
+                        <img id="imgCmQuantum" src="/results/confusion_matrix_quantum.png" alt="Quantum Confusion Matrix" class="img-responsive cm-image">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scientific Interpretation Note -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Objective Scientific Interpretation</h3>
+                    <span class="badge badge-dark">Analysis</span>
+                </div>
+                <div class="card-body" id="comparisonSummaryText">
+                    <p class="text-muted">Loading evaluation comparison summary...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 7: FAULT PREDICTOR & MAINTENANCE (IMPROVED) -->
+        <!-- ==================================================================== -->
+        <section id="tab-detection" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Fault Predictor & Engineering Maintenance Advisories</h2>
+                    <p class="section-desc">Classify sensor telemetry with classical or quantum machine learning and view actionable maintenance inspection steps.</p>
+                </div>
+            </div>
+
+            <!-- Predictor Mode Switcher -->
+            <div class="mode-tabs-wrap mb-3">
+                <button class="btn btn-sm btn-primary" id="btnModeManual">Single Sample Manual Input</button>
+                <button class="btn btn-sm btn-outline" id="btnModeBatch">Batch CSV File Prediction</button>
+            </div>
+
+            <!-- MODE 1: SINGLE SAMPLE MANUAL INPUT -->
+            <div id="sectionManualPredict">
+                <div class="grid grid-2-col">
+                    <!-- Feature Inputs Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Sensor Telemetry Parameters</h3>
+                            <button class="btn btn-outline btn-xs" id="btnFillDefaults">Fill Nominal Defaults</button>
+                        </div>
+                        <div class="card-body">
+                            <form id="manualPredictForm">
+                                <div class="grid grid-3-col gap-2" id="dynamicFeatureInputsContainer">
+                                    <!-- Populated dynamically based on active model features -->
+                                </div>
+
+                                <div class="mt-4 d-flex justify-between align-center">
+                                    <div class="d-flex align-center gap-2">
+                                        <label for="predictModelChoiceSelect"><strong>Classifier Model:</strong></label>
+                                        <select id="predictModelChoiceSelect" class="form-select" style="max-width: 200px;">
+                                            <option value="classical">Classical SVM (RBF)</option>
+                                            <option value="quantum">Quantum QSVC</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-accent btn-lg" id="btnSubmitManualPredict">
+                                        ⚡ Run Fault Diagnosis
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Live Diagnosis & Maintenance Advisory Card -->
+                    <div class="card" id="diagnosisResultCard">
+                        <div class="card-header">
+                            <h3>Diagnostic Health Assessment</h3>
+                            <span class="badge" id="liveHealthBadge">Normal</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Hero Classification Result -->
+                            <div class="classification-hero mb-3">
+                                <span class="hero-label">Predicted Category:</span>
+                                <h2 class="hero-val" id="liveFaultCategory">Normal Operation</h2>
+                                <div class="hero-meta mt-1">
+                                    <span class="text-muted" id="liveModelUsed">Classical SVM</span> • 
+                                    <span class="text-muted" id="liveTimestamp">--:--:--</span>
+                                </div>
+                            </div>
+
+                            <!-- Confidence Meter -->
+                            <div class="confidence-box mb-4">
+                                <div class="d-flex justify-between small mb-1">
+                                    <span>Model Confidence Probability:</span>
+                                    <strong id="liveConfidenceVal">95%</strong>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill fill-green" id="liveConfidenceBar" style="width: 95%;"></div>
+                                </div>
+                                <span class="text-muted small mt-1 d-block">
+                                    * Model confidence represents estimated class posterior probability, not an absolute physical guarantee.
+                                </span>
+                            </div>
+
+                            <!-- Actionable Maintenance Advisory Box -->
+                            <div class="maintenance-card" id="maintenanceCardWrap">
+                                <div class="d-flex justify-between align-center mb-2">
+                                    <h4>🛠️ Engineering Inspection Steps</h4>
+                                    <span class="severity-badge" id="advSeverityBadge">NORMAL</span>
+                                </div>
+                                <p class="small text-muted mb-2" id="advPatternDesc">Normal operating parameters within standard nominal statistical variance.</p>
+                                
+                                <ul class="inspection-checklist" id="advInspectionList">
+                                    <li>Perform scheduled periodic telemetry calibration check.</li>
+                                    <li>Verify network latency and sensor DAQ heartbeat consistency.</li>
+                                </ul>
+
+                                <div class="action-highlight mt-2">
+                                    <strong>Recommended Action:</strong>
+                                    <span id="advActionText">Continue routine telemetry monitoring.</span>
+                                </div>
+
+                                <span class="disclaimer-text mt-2" id="advDisclaimerText">
+                                    Advisory guidance based on automated statistical anomaly detection. Physical verification by certified engineering personnel required prior to equipment overhaul.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODE 2: BATCH CSV FILE PREDICTION (Hidden by default) -->
+            <div id="sectionBatchPredict" class="d-none">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Batch Sensor Telemetry Classification</h3>
+                        <span class="badge badge-teal">Accepts CSV File</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="drop-zone" id="batchDropZone">
+                            <div class="drop-zone-icon">📊</div>
+                            <h4>Drag and drop telemetry CSV for batch prediction</h4>
+                            <p class="text-muted">File should contain matching sensor feature columns.</p>
+                            <input type="file" id="batchFileInput" accept=".csv" class="file-input-hidden">
+                            <button class="btn btn-primary btn-sm mt-2" onclick="document.getElementById('batchFileInput').click()">
+                                Choose Batch CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batch Results Preview Card -->
+                <div class="card d-none" id="batchResultsCard">
+                    <div class="card-header">
+                        <div>
+                            <h3>Batch Prediction Results</h3>
+                            <span class="text-muted" id="batchSummaryStats">Total rows classified: --</span>
+                        </div>
+                        <a href="/api/download/predictions_batch" class="btn btn-accent btn-sm" id="btnDownloadBatchCsv">
+                            ⬇ Download Predictions (CSV)
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Row</th>
+                                        <th>Predicted Fault Category</th>
+                                        <th>Confidence</th>
+                                        <th>Severity</th>
+                                        <th>Recommended Maintenance Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="batchResultsTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 8: REPORTS & HISTORY (NEW) -->
+        <!-- ==================================================================== -->
+        <section id="tab-history" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>Reports, Exports & Experiment History</h2>
+                    <p class="section-desc">Download complete experimental artifacts, dataset summaries, predictions, and audit historical training runs.</p>
+                </div>
+            </div>
+
+            <!-- Download Quick-Action Cards -->
+            <div class="grid grid-3-col mb-4">
+                <div class="card report-download-card">
+                    <div class="report-icon">📁</div>
+                    <div class="report-body">
+                        <h4>Cleaned Active Dataset</h4>
+                        <p class="text-muted small">Export the currently preprocessed dataset with normalized columns and encoded class labels.</p>
+                        <a href="/api/download/cleaned_dataset" class="btn btn-outline btn-sm mt-2">
+                            ⬇ Download Dataset (CSV)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card report-download-card">
+                    <div class="report-icon">📊</div>
+                    <div class="report-body">
+                        <h4>Comparative Metrics Summary</h4>
+                        <p class="text-muted small">Side-by-side benchmark table comparing accuracy, F1-scores, precision, recall, and training duration.</p>
+                        <a href="/api/download/metrics_csv" class="btn btn-outline btn-sm mt-2">
+                            ⬇ Download Metrics (CSV)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card report-download-card">
+                    <div class="report-icon">🎯</div>
+                    <div class="report-body">
+                        <h4>Test Split Predictions</h4>
+                        <p class="text-muted small">Sample-level test set classifications with true labels, predicted labels, and probabilities.</p>
+                        <a href="/api/download/predictions" class="btn btn-outline btn-sm mt-2">
+                            ⬇ Download Predictions (CSV)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card report-download-card">
+                    <div class="report-icon">📑</div>
+                    <div class="report-body">
+                        <h4>Classification Report</h4>
+                        <p class="text-muted small">Detailed per-class breakdown of precision, recall, and F1-score across all five fault categories.</p>
+                        <a href="/api/download/per_class_metrics" class="btn btn-outline btn-sm mt-2">
+                            ⬇ Download Report (TXT)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card report-download-card">
+                    <div class="report-icon">🔲</div>
+                    <div class="report-body">
+                        <h4>Confusion Matrix Values</h4>
+                        <p class="text-muted small">Raw confusion matrix contingency table formatted as CSV for external statistical plotting.</p>
+                        <a href="/api/download/confusion_matrix" class="btn btn-outline btn-sm mt-2">
+                            ⬇ Download Matrix (CSV)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card report-download-card">
+                    <div class="report-icon">📜</div>
+                    <div class="report-body">
+                        <h4>Experiment History Log</h4>
+                        <p class="text-muted small">Complete historical log of all training runs, dataset names, model choices, and timestamps.</p>
+                        <a href="/api/download/experiment_history" class="btn btn-outline btn-sm mt-2">
+                            ⬇ Download History (CSV)
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experiment History Log Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Historical Experiment Run Log</h3>
+                        <span class="text-muted">Recorded runs from experiment_history.json</span>
+                    </div>
+                    <button class="btn btn-outline btn-xs" id="btnClearHistory">Clear History</button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Experiment ID</th>
+                                    <th>Timestamp</th>
+                                    <th>Dataset</th>
+                                    <th>Model Engine</th>
+                                    <th>Train / Test Samples</th>
+                                    <th>Accuracy</th>
+                                    <th>Macro F1</th>
+                                    <th>Train Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="experimentHistoryTableBody">
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted">Loading experiment history...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- TAB 9: ABOUT -->
+        <!-- ==================================================================== -->
+        <section id="tab-about" class="tab-pane" role="tabpanel">
+            <div class="page-title-row">
+                <div>
+                    <h2>About QuantumSense</h2>
+                    <p class="section-desc">Academic foundation, architecture, and technology stack for quantum-enhanced sensor fault detection.</p>
+                </div>
+                <div class="student-pill">
+                    <span class="pill-label">Registration ID:</span>
+                    <span class="pill-value">URK24CS1111</span>
+                </div>
+            </div>
+
+            <!-- Abstract Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Project Abstract</h3>
+                    <span class="badge badge-teal">B.Tech CSE Project</span>
+                </div>
+                <div class="card-body">
+                    <p class="lead-text">
+                        <strong>QuantumSense</strong> is an end-to-end sensor fault detection and telemetry monitoring system that investigates the diagnostic efficacy of Quantum Machine Learning (QML) relative to classical Support Vector Machines (SVM). Designed for Industrial Internet of Things (IIoT) applications, the platform simulates and analyzes multi-modal signals from temperature, pressure, and vibration sensors, classifying anomalous behavior across five distinct fault categories.
+                    </p>
+                    <p class="text-muted mt-2">
+                        By integrating a <strong>Fidelity Quantum Kernel</strong> based on parameterized <strong>ZZFeatureMap</strong> circuits simulated via Qiskit, QuantumSense empirically benchmarks quantum Hilbert-space state embeddings against classical radial basis function (RBF) kernels on held-out test telemetry.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Objectives Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Project Objectives</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="bullet-list">
+                        <li><strong>Synthetic Multi-Sensor Simulation:</strong> Generate reproducible, physics-grounded telemetry for Temperature, Pressure, and Vibration sensors across five distinct operational modes.</li>
+                        <li><strong>Custom Dataset Ingestion:</strong> Support custom industrial CSV dataset uploads with automated column role detection, sliding-window time-series feature engineering, and robust cleaning.</li>
+                        <li><strong>Feature Engineering Pipeline:</strong> Extract fifteen statistical sliding-window features (mean, std dev, minimum, maximum, trend slope) without data leakage.</li>
+                        <li><strong>Classical Machine Learning Baseline:</strong> Implement a robust, multi-class Support Vector Classifier (SVC) using scikit-learn with an RBF kernel.</li>
+                        <li><strong>Quantum Machine Learning Implementation:</strong> Formulate a 4-qubit Quantum Support Vector Classifier (QSVC) utilizing Qiskit Machine Learning and local statevector fidelity simulation.</li>
+                        <li><strong>Empirical Rigorous Benchmarking:</strong> Benchmark models side-by-side using Accuracy, Macro and Weighted Precision, Recall, F1-Score, and Wall-Clock Latency without fabricating quantum advantage.</li>
+                        <li><strong>Actionable Maintenance Guidance:</strong> Provide engineering inspection checklists and severity assessments for detected fault conditions.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- System Architecture Box Diagram -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>System Architecture & Processing Pipeline</h3>
+                    <span class="badge badge-dark">Pipeline Flow</span>
+                </div>
+                <div class="card-body">
+                    <div class="architecture-flow">
+                        <div class="arch-box">
+                            <div class="arch-box-title">1. Telemetry Source</div>
+                            <div class="arch-box-desc">Synthetic Simulation OR Custom CSV Upload</div>
+                        </div>
+                        <div class="arch-arrow">➔</div>
+                        <div class="arch-box">
+                            <div class="arch-box-title">2. Ingestion & Windowing</div>
+                            <div class="arch-box-desc">Mode A (Precomputed) or Mode B (W=50 Sliding Window)</div>
+                        </div>
+                        <div class="arch-arrow">➔</div>
+                        <div class="arch-box">
+                            <div class="arch-box-title">3. Zero-Leakage Preprocessing</div>
+                            <div class="arch-box-desc">StandardScaler & [0, π] Angle Scaler (Train Split Only)</div>
+                        </div>
+                        <div class="arch-arrow">➔</div>
+                        <div class="arch-box">
+                            <div class="arch-box-title">4. Dual Model Engines</div>
+                            <div class="arch-box-desc">Classical SVM (RBF) & Quantum QSVC (ZZFeatureMap)</div>
+                        </div>
+                        <div class="arch-arrow">➔</div>
+                        <div class="arch-box">
+                            <div class="arch-box-title">5. Diagnostic Dashboard</div>
+                            <div class="arch-box-desc">Flask REST API, Waveforms, Analytics & Maintenance</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Software Requirements & Tech Stack -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Technology Stack</h3>
+                </div>
+                <div class="card-body">
+                    <div class="badge-grid">
+                        <span class="tech-badge">Python 3.10+</span>
+                        <span class="tech-badge">Flask 3.x</span>
+                        <span class="tech-badge">Qiskit 1.x / ML 0.9+</span>
+                        <span class="tech-badge">Scikit-Learn</span>
+                        <span class="tech-badge">NumPy & Pandas</span>
+                        <span class="tech-badge">Chart.js</span>
+                        <span class="tech-badge">Joblib</span>
+                        <span class="tech-badge">Pytest</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay d-none">
+        <div class="spinner"></div>
+        <div class="loading-msg" id="loadingMsg">Processing request...</div>
+    </div>
+
+    <!-- Dashboard JavaScript Controller -->
+    <script src="/static/script.js"></script>
+</body>
+</html>
